@@ -1,24 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useRef, useState, createContext } from 'react';
+import ArViewer from './components/panels/ArViewer';
+import styled from 'styled-components';
+import config from './config';
+import { initializeScene } from './threejs';
 
-function App() {
+const WebGLContainer = styled.div`
+
+`;
+export const AppContext = createContext({});
+
+const App = () => {
+  const webGLContainerRef = useRef(null);
+  const contextRef = useRef({
+    primaryDirectionalLightContainer: {},
+  });
+  const context = contextRef.current;
+
+  // Put Global Context states here
+  const [sceneTitles, setSceneTitles] = useState(config.defaults.sceneTitles);
+
+  // To share variables with threejs, add them as a key/value to this object
+  context.sceneTitles = sceneTitles; 
+
+  useEffect(() => {
+    initializeScene({
+      webGLContainerRef, 
+      params: config.params,
+      context, 
+  }); 
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AppContext.Provider value={{
+      sceneTitles, setSceneTitles
+    }}>
+      <ArViewer/> 
+      <WebGLContainer
+        ref={webGLContainerRef}
+      />
+    </AppContext.Provider>
   );
 }
 
